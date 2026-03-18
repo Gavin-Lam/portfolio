@@ -745,36 +745,167 @@ function Skills() {
 }
 
 function Contact() {
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.message) return;
+    setStatus("sending");
+    try {
+      const res = await fetch("https://formspree.io/f/xwvrwgll", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setStatus("success");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  };
+
   return (
     <section id="contact" className="py-28 px-6">
-      <div className="max-w-6xl mx-auto text-center">
-        <SectionLabel label="contact" index="05" center />
-        <h2 className="font-display text-4xl md:text-6xl font-bold text-text-primary mt-12 mb-4">
-          Let&apos;s build something
-          <br />
-          <span className="text-accent glow">together.</span>
-        </h2>
-        <p className="text-text-secondary font-mono text-sm max-w-md mx-auto mb-10">
-          I&apos;m actively looking for full-time SWE roles starting mid-2026.
-          Open to full-stack, backend, or ML/AI positions. Let&apos;s talk.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <a
-            href="mailto:gglam1371@gmail.com"
-            className="flex items-center gap-2 bg-accent text-bg font-mono text-sm font-medium px-8 py-4 hover:bg-accent/80 transition-all duration-200"
-          >
-            <Mail size={16} />
-            gglam1371@gmail.com
-          </a>
-          <a
-            href="https://linkedin.com/in/gavin-g-lam/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 border border-border text-text-secondary font-mono text-sm px-8 py-4 hover:border-accent hover:text-accent transition-all duration-200"
-          >
-            <Linkedin size={16} />
-            LinkedIn
-          </a>
+      <div className="max-w-6xl mx-auto">
+        <SectionLabel label="contact" index="05" />
+
+        <div className="mt-12 grid md:grid-cols-2 gap-16 items-start">
+
+          {/* Left — copy */}
+          <div className="animate-on-scroll">
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-text-primary mb-4">
+              Let&apos;s build something
+              <br />
+              <span className="text-accent glow">together.</span>
+            </h2>
+            <p className="text-text-secondary font-mono text-sm leading-loose mb-8">
+              I&apos;m actively looking for full-time SWE roles starting mid-2026.
+              Open to full-stack, backend, or ML/AI positions. Drop me a message
+              and I&apos;ll get back to you within 24 hours.
+            </p>
+            <div className="flex flex-col gap-4">
+              <a
+                href="mailto:gglam1371@gmail.com"
+                className="flex items-center gap-3 text-text-secondary hover:text-accent font-mono text-sm transition-colors duration-200"
+              >
+                <Mail size={16} className="text-accent" />
+                gglam1371@gmail.com
+              </a>
+              <a
+                href="https://linkedin.com/in/gavin-g-lam/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-text-secondary hover:text-accent font-mono text-sm transition-colors duration-200"
+              >
+                <Linkedin size={16} className="text-accent" />
+                linkedin.com/in/gavin-g-lam
+              </a>
+              <a
+                href="https://github.com/Gavin-Lam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-text-secondary hover:text-accent font-mono text-sm transition-colors duration-200"
+              >
+                <Github size={16} className="text-accent" />
+                github.com/Gavin-Lam
+              </a>
+            </div>
+          </div>
+
+          {/* Right — form */}
+          <div className="animate-on-scroll" style={{ transitionDelay: "0.15s" }}>
+            <div className="bg-surface border border-border p-8">
+              {/* Terminal header */}
+              <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
+                <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                <div className="w-3 h-3 rounded-full bg-accent/70" />
+                <span className="ml-2 text-muted text-xs font-mono">new_message.sh</span>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                {/* Name */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-mono text-muted">
+                    <span className="text-accent mr-1">$</span> name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="John Smith"
+                    className="bg-bg border border-border text-text-primary font-mono text-sm px-4 py-3 outline-none focus:border-accent transition-colors duration-200 placeholder:text-muted/40"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-mono text-muted">
+                    <span className="text-accent mr-1">$</span> email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="john@company.com"
+                    className="bg-bg border border-border text-text-primary font-mono text-sm px-4 py-3 outline-none focus:border-accent transition-colors duration-200 placeholder:text-muted/40"
+                  />
+                </div>
+
+                {/* Message */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-mono text-muted">
+                    <span className="text-accent mr-1">$</span> message
+                  </label>
+                  <textarea
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    placeholder="Hey Gavin, I'd love to chat about..."
+                    rows={5}
+                    className="bg-bg border border-border text-text-primary font-mono text-sm px-4 py-3 outline-none focus:border-accent transition-colors duration-200 placeholder:text-muted/40 resize-none"
+                  />
+                </div>
+
+                {/* Submit */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={status === "sending" || status === "success"}
+                  className={`flex items-center justify-center gap-2 font-mono text-sm px-6 py-3 transition-all duration-200 ${
+                    status === "success"
+                      ? "bg-accent/20 border border-accent text-accent cursor-default"
+                      : status === "error"
+                      ? "bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20"
+                      : "bg-accent text-bg hover:bg-accent/80"
+                  }`}
+                >
+                  {status === "idle" && (
+                    <><ChevronRight size={14} /> send message</>
+                  )}
+                  {status === "sending" && (
+                    <><span className="animate-pulse">sending</span><span className="animate-blink">_</span></>
+                  )}
+                  {status === "success" && (
+                    <>✓ message sent</>
+                  )}
+                  {status === "error" && (
+                    <>✕ failed — try again</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -907,9 +1038,9 @@ export default function Home() {
       <div ref={cursorRef} className="cursor" />
       <div ref={trailRef} className="cursor-trail" />
 
-      {resumeOpen && <ResumeModal onClose={() => setResumeOpen(false)} />} {/* ← add this */}
+      {resumeOpen && <ResumeModal onClose={() => setResumeOpen(false)} />} 
 
-      <Navbar onResumeClick={() => setResumeOpen(true)} /> {/* ← pass prop */}
+      <Navbar onResumeClick={() => setResumeOpen(true)} /> 
       <Hero />
       <About />
       <Experience />
