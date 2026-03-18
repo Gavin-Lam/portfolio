@@ -239,6 +239,8 @@ function useScrollAnimation() {
 
 function Navbar({ onResumeClick }: { onResumeClick: () => void }) {
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -246,40 +248,132 @@ function Navbar({ onResumeClick }: { onResumeClick: () => void }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const sections = NAV_LINKS.map((l) => l.href.replace("#", ""));
+    const observers = sections.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        { rootMargin: "-40% 0px -55% 0px" }
+      );
+      obs.observe(el);
+      return obs;
+    });
+    return () => observers.forEach((o) => o?.disconnect());
+  }, []);
+
+  // lock body scroll when menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "py-3 bg-bg/90 backdrop-blur-md border-b border-border"
-          : "py-6"
-      }`}
-    >
-      <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
-        <span className="font-display font-bold text-accent text-lg tracking-tight">
-          GL
-        </span>
-        <ul className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? "py-3 bg-bg/90 backdrop-blur-md border-b border-border" : "py-6"
+      }`}>
+        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+          <span className="font-display font-bold text-accent text-lg tracking-tight">GL</span>
+
+          {/* Desktop links */}
+          <ul className="hidden md:flex items-center gap-8">
+            {NAV_LINKS.map((link) => {
+              const isActive = activeSection === link.href.replace("#", "");
+              return (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    className={`text-sm font-mono transition-colors duration-200 relative ${
+                      isActive ? "text-accent" : "text-muted hover:text-accent"
+                    }`}
+                  >
+                    <span className="text-accent/50 mr-1">./</span>
+                    {link.label}
+                    {isActive && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-px bg-accent" />
+                    )}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Desktop resume button */}
+          <button
+            onClick={onResumeClick}
+            className="hidden md:flex items-center gap-2 text-xs font-mono border border-accent text-accent px-4 py-2 hover:bg-accent hover:text-bg transition-all duration-200"
+          >
+            <Terminal size={12} />
+            resume.pdf
+          </button>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5 z-50"
+            aria-label="Toggle menu"
+          >
+            <span className={`block h-px w-6 bg-accent transition-all duration-300 ${
+              menuOpen ? "rotate-45 translate-y-2" : ""
+            }`} />
+            <span className={`block h-px w-6 bg-accent transition-all duration-300 ${
+              menuOpen ? "opacity-0" : ""
+            }`} />
+            <span className={`block h-px w-6 bg-accent transition-all duration-300 ${
+              menuOpen ? "-rotate-45 -translate-y-2" : ""
+            }`} />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile menu overlay */}
+      <div className={`fixed inset-0 z-40 bg-bg flex flex-col justify-center px-10 transition-all duration-300 md:hidden ${
+        menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      }`}>
+        <ul className="flex flex-col gap-8 mb-12">
+          {NAV_LINKS.map((link, i) => (
+            <li
+              key={link.href}
+              style={{
+                transitionDelay: menuOpen ? `${i * 0.06}s` : "0s",
+                transform: menuOpen ? "translateX(0)" : "translateX(-16px)",
+                opacity: menuOpen ? 1 : 0,
+                transition: "transform 0.3s ease, opacity 0.3s ease",
+              }}
+            >
               <a
                 href={link.href}
-                className="text-muted hover:text-accent text-sm font-mono transition-colors duration-200"
+                onClick={() => setMenuOpen(false)}
+                className="font-display font-bold text-4xl text-text-primary hover:text-accent transition-colors duration-200"
               >
-                <span className="text-accent/50 mr-1">./</span>
+                <span className="text-accent/40 text-xl mr-2">0{i + 1}.</span>
                 {link.label}
               </a>
             </li>
           ))}
         </ul>
-        <button
-          onClick={onResumeClick}
-          className="hidden md:flex items-center gap-2 text-xs font-mono border border-accent text-accent px-4 py-2 hover:bg-accent hover:text-bg transition-all duration-200"
+
+        {/* Resume button in mobile menu */}
+        <div
+          style={{
+            transitionDelay: menuOpen ? `${NAV_LINKS.length * 0.06}s` : "0s",
+            transform: menuOpen ? "translateX(0)" : "translateX(-16px)",
+            opacity: menuOpen ? 1 : 0,
+            transition: "transform 0.3s ease, opacity 0.3s ease",
+          }}
         >
-          <Terminal size={12} />
-          resume.pdf
-        </button>
+          <button
+            onClick={() => { setMenuOpen(false); onResumeClick(); }}
+            className="flex items-center gap-2 text-sm font-mono border border-accent text-accent px-6 py-3 hover:bg-accent hover:text-bg transition-all duration-200"
+          >
+            <Terminal size={14} />
+            resume.pdf
+          </button>
+        </div>
       </div>
-    </nav>
+    </>
   );
 }
 
@@ -289,8 +383,8 @@ function Hero() {
   return (
     <section className="relative min-h-screen flex flex-col justify-center grid-bg px-6 overflow-hidden">
       {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none glow-orb-1" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-sky/5 rounded-full blur-3xl pointer-events-none glow-orb-2" />
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-sky/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto w-full pt-24">
         {/* Terminal prompt line */}
