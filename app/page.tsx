@@ -183,6 +183,7 @@ function useTypewriter(words: string[], speed = 80, pause = 1800) {
 
 function useCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
@@ -190,24 +191,30 @@ function useCursor() {
         cursorRef.current.style.left = `${e.clientX}px`;
         cursorRef.current.style.top = `${e.clientY}px`;
       }
+      // trail follows with a slight delay via CSS transition
+      if (trailRef.current) {
+        trailRef.current.style.left = `${e.clientX}px`;
+        trailRef.current.style.top = `${e.clientY}px`;
+      }
     };
-    const over = () => cursorRef.current?.classList.add("hovering");
-    const out = () => cursorRef.current?.classList.remove("hovering");
+    const over = () => {
+      cursorRef.current?.classList.add("hovering");
+      if (trailRef.current) trailRef.current.style.opacity = "0";
+    };
+    const out = () => {
+      cursorRef.current?.classList.remove("hovering");
+      if (trailRef.current) trailRef.current.style.opacity = "1";
+    };
 
     window.addEventListener("mousemove", move);
-    document
-      .querySelectorAll("a, button")
-      .forEach((el) => el.addEventListener("mouseenter", over));
-    document
-      .querySelectorAll("a, button")
-      .forEach((el) => el.addEventListener("mouseleave", out));
-
-    return () => {
-      window.removeEventListener("mousemove", move);
-    };
+    document.querySelectorAll("a, button").forEach((el) => {
+      el.addEventListener("mouseenter", over);
+      el.addEventListener("mouseleave", out);
+    });
+    return () => window.removeEventListener("mousemove", move);
   }, []);
 
-  return cursorRef;
+  return { cursorRef, trailRef };
 }
 
 function useScrollAnimation() {
@@ -282,8 +289,8 @@ function Hero() {
   return (
     <section className="relative min-h-screen flex flex-col justify-center grid-bg px-6 overflow-hidden">
       {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-sky/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none glow-orb-1" />
+      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-sky/5 rounded-full blur-3xl pointer-events-none glow-orb-2" />
 
       <div className="max-w-6xl mx-auto w-full pt-24">
         {/* Terminal prompt line */}
@@ -797,13 +804,14 @@ function SectionLabel({
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const cursorRef = useCursor();
+  const { cursorRef, trailRef } = useCursor();
   useScrollAnimation();
   const [resumeOpen, setResumeOpen] = useState(false);
   return (
     <main className="noise bg-bg text-text-primary min-h-screen">
       {/* Custom cursor */}
       <div ref={cursorRef} className="cursor" />
+      <div ref={trailRef} className="cursor-trail" />
 
       {resumeOpen && <ResumeModal onClose={() => setResumeOpen(false)} />} {/* ← add this */}
 
