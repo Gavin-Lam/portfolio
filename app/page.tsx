@@ -452,128 +452,60 @@ function About() {
 
 function Experience() {
   const [active, setActive] = useState(0);
-  const [animating, setAnimating] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const onScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const sectionHeight = section.offsetHeight - window.innerHeight;
-      const scrolled = -rect.top;
-      const progress = Math.max(0, Math.min(1, scrolled / sectionHeight));
-      const idx = Math.min(
-        Math.floor(progress * EXPERIENCES.length),
-        EXPERIENCES.length - 1
-      );
-      if (idx !== active) {
-        setAnimating(true);
-        setTimeout(() => {
-          setActive(idx);
-          setAnimating(false);
-        }, 200);
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [active]);
-
   const exp = EXPERIENCES[active];
-  const progress = (active / (EXPERIENCES.length - 1)) * 100;
 
   return (
-    <section
-      id="experience"
-      ref={sectionRef}
-      style={{ height: `${EXPERIENCES.length * 60}vh` }}
-      className="relative"
-    >
-      {/* Sticky container */}
-      <div
-        ref={stickyRef}
-        className="sticky top-0 h-screen flex flex-col justify-center px-6 bg-surface/30"
-      >
-        <div className="max-w-6xl mx-auto w-full">
-          <SectionLabel label="experience" index="02" />
+    <section id="experience" className="py-28 px-6 bg-surface/30">
+      <div className="max-w-6xl mx-auto">
+        <SectionLabel label="experience" index="02" />
+        <div className="mt-12 grid md:grid-cols-[220px_1fr] gap-8">
+          {/* Tabs */}
+          <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+            {EXPERIENCES.map((e, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                className={`text-left text-xs font-mono px-4 py-3 border-b-2 md:border-b-0 md:border-l-2 whitespace-nowrap transition-all duration-200 ${
+                  active === i
+                    ? "border-accent text-accent bg-accent/5"
+                    : "border-border text-muted hover:text-text-secondary hover:border-text-secondary"
+                }`}
+              >
+                {e.company}
+              </button>
+            ))}
+          </div>
 
-          <div className="mt-10 grid md:grid-cols-[1fr_340px] gap-10 items-start">
-
-            {/* Left — active experience card */}
-            <div
-              className={`transition-all duration-200 ${
-                animating ? "opacity-0 translate-y-3" : "opacity-100 translate-y-0"
-              }`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2 mb-1">
-                <h3 className="font-display text-2xl md:text-3xl font-bold text-text-primary">
-                  {exp.role}
-                </h3>
-                <span className="text-xs font-mono text-muted pt-2">{exp.period}</span>
-              </div>
-              <p className="text-accent text-sm font-mono mb-4">{exp.company}</p>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {exp.stack.map((s) => (
-                  <span key={s} className="tag">{s}</span>
-                ))}
-              </div>
-              <ul className="space-y-4">
-                {exp.bullets.map((b, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-3 text-text-secondary text-sm font-mono leading-relaxed"
-                    style={{
-                      transitionDelay: `${i * 0.05}s`,
-                      opacity: animating ? 0 : 1,
-                      transition: "opacity 0.3s ease",
-                    }}
-                  >
-                    <ChevronRight size={14} className="text-accent mt-1 flex-shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
+          {/* Content */}
+          <div className="animate-on-scroll">
+            <div className="flex flex-wrap items-start justify-between gap-2 mb-1">
+              <h3 className="font-display text-xl font-semibold text-text-primary">
+                {exp.role}
+              </h3>
+              <span className="text-xs font-mono text-muted">{exp.period}</span>
             </div>
-
-            {/* Right — timeline nav */}
-            <div className="flex flex-col gap-1">
-              {/* Progress bar */}
-              <div className="h-px bg-border w-full mb-6 relative overflow-hidden">
-                <div
-                  className="absolute top-0 left-0 h-full bg-accent transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-
-              {EXPERIENCES.map((e, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  className={`text-left px-5 py-4 border-l-2 transition-all duration-200 group ${
-                    active === i
-                      ? "border-accent bg-accent/5"
-                      : "border-border hover:border-text-secondary/40"
-                  }`}
-                >
-                  <div className={`font-display font-semibold text-sm transition-colors duration-200 ${
-                    active === i ? "text-accent" : "text-muted group-hover:text-text-primary"
-                  }`}>
-                    {e.company}
-                  </div>
-                  <div className="text-xs font-mono text-muted mt-0.5">{e.role}</div>
-                  <div className="text-xs font-mono text-muted/60 mt-0.5">{e.period}</div>
-                </button>
+            <p className="text-accent text-sm font-mono mb-4">{exp.company}</p>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {exp.stack.map((s) => (
+                <span key={s} className="tag">
+                  {s}
+                </span>
               ))}
-
-              {/* Scroll hint */}
-              <p className="text-xs font-mono text-muted/40 mt-4 flex items-center gap-2">
-                <ArrowDown size={10} />
-                scroll to navigate
-              </p>
             </div>
+            <ul className="space-y-3">
+              {exp.bullets.map((b, i) => (
+                <li
+                  key={i}
+                  className="flex gap-3 text-text-secondary text-sm font-mono leading-relaxed"
+                >
+                  <ChevronRight
+                    size={14}
+                    className="text-accent mt-1 flex-shrink-0"
+                  />
+                  {b}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
