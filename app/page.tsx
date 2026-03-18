@@ -10,6 +10,7 @@ import {
   Terminal,
   ChevronRight,
 } from "lucide-react";
+import { div } from "framer-motion/m";
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -229,7 +230,7 @@ function useScrollAnimation() {
 
 // ─── COMPONENTS ──────────────────────────────────────────────────────────────
 
-function Navbar() {
+function Navbar({ onResumeClick }: { onResumeClick: () => void }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -263,15 +264,13 @@ function Navbar() {
             </li>
           ))}
         </ul>
-        <a
-          href="/resume.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={onResumeClick}
           className="hidden md:flex items-center gap-2 text-xs font-mono border border-accent text-accent px-4 py-2 hover:bg-accent hover:text-bg transition-all duration-200"
         >
           <Terminal size={12} />
           resume.pdf
-        </a>
+        </button>
       </div>
     </nav>
   );
@@ -712,6 +711,66 @@ function Footer() {
   );
 }
 
+function ResumeModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-10"
+      style={{ background: "rgba(8, 12, 16, 0.92)" }}
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-4xl h-[90vh] bg-surface border border-border flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <Terminal size={14} className="text-accent" />
+            <span className="font-mono text-sm text-text-secondary">
+              Lam_Gavin_Resume.pdf
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a
+              href="/resume.pdf"
+              download="Lam_Gavin_Resume.pdf"
+              className="flex items-center gap-2 text-xs font-mono border border-accent text-accent px-4 py-2 hover:bg-accent hover:text-bg transition-all duration-200"
+            >
+              download
+              <ArrowDown size={12} />
+            </a>
+            <button
+              onClick={onClose}
+              className="text-muted hover:text-accent transition-colors font-mono text-lg leading-none"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
+        {/* PDF iframe */}
+        <iframe
+          src="/resume.pdf"
+          className="w-full flex-1"
+          title="Gavin Lam Resume"
+          style={{ border: "none" }}
+        />
+      </div>
+    </div>
+  );
+}
+
 // Reusable section label
 function SectionLabel({
   label,
@@ -740,13 +799,15 @@ function SectionLabel({
 export default function Home() {
   const cursorRef = useCursor();
   useScrollAnimation();
-
+  const [resumeOpen, setResumeOpen] = useState(false);
   return (
     <main className="noise bg-bg text-text-primary min-h-screen">
       {/* Custom cursor */}
       <div ref={cursorRef} className="cursor" />
 
-      <Navbar />
+      {resumeOpen && <ResumeModal onClose={() => setResumeOpen(false)} />} {/* ← add this */}
+
+      <Navbar onResumeClick={() => setResumeOpen(true)} /> {/* ← pass prop */}
       <Hero />
       <About />
       <Experience />
