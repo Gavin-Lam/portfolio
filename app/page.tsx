@@ -112,7 +112,7 @@ const PROJECTS = [
     description:
       "AI-powered voice chatbot designed to help users discuss mental and surface-level physical health concerns. Built as a team project, containerized with Docker and served via a Python web app accessible in-browser.",
     stack: ["Python", "JavaScript", "HTML/CSS", "Docker"],
-    github: "https://github.com/cascadingluo/SSW590-team-7-project",
+    github: "https://github.com/Gavin-Lam/healthchat",
     live: null,
     highlight: "Voice-interactive AI health assistant",
   },
