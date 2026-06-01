@@ -116,6 +116,16 @@ const PROJECTS = [
     live: null,
     highlight: "Voice-interactive AI health assistant",
   },
+    {
+    title: "Xur — Map guider",
+    period: "2026",
+    description:
+      "AI assistant designed to help users navigate, explore, and ploute routes on maps. Built with React and Tailwind, taking advantage of LLM APIs to provde real time guidance.",
+    stack: ["React", "JavaScript", "Tailwind", "Gemini API", "Mapbox API"],
+    github: "https://github.com/Gavin-Lam/Xur",
+    live: null,
+    highlight: "Voice-interactive AI map guide",
+  },
 ];
 
 const SKILLS = {
