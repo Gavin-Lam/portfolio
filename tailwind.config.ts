@@ -1,45 +1,41 @@
 import type { Config } from "tailwindcss";
 
+// Theme colours are CSS variables (see app/globals.css) so the whole site
+// follows the visitor's light/dark preference without `dark:` variants.
+const themed = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
-        bg: "#080C10",
-        surface: "#0D1117",
-        border: "#1E2A35",
-        accent: "#4FFFB0",
-        sky: "#38BDF8",
-        muted: "#4B6076",
-        "text-primary": "#E2E8F0",
-        "text-secondary": "#94A3B8",
+        ground: themed("ground"),
+        surface: themed("surface"),
+        ink: themed("ink"),
+        soft: themed("soft"),
+        line: themed("line"),
+        brand: themed("brand"),
+        "on-brand": themed("on-brand"),
+        // Fixed colours for the project sketches, which always render as
+        // dark "screens" regardless of theme.
+        signal: "#F5C518",
+        night: "#101B2D",
+        "night-raised": "#1A2942",
+        "night-line": "#2C3F60",
+        "night-text": "#E8EDF4",
+        "night-soft": "#9DACC0",
+        beam: "#8AA7FF",
       },
       fontFamily: {
-        display: ["var(--font-syne)", "sans-serif"],
-        mono: ["var(--font-ibm-mono)", "monospace"],
+        display: ["var(--font-display)", "Impact", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
-      animation: {
-        "fade-up": "fadeUp 0.6s ease forwards",
-        blink: "blink 1s step-end infinite",
-        "slide-in": "slideIn 0.5s ease forwards",
-      },
-      keyframes: {
-        fadeUp: {
-          "0%": { opacity: "0", transform: "translateY(24px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        blink: {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0" },
-        },
-        slideIn: {
-          "0%": { opacity: "0", transform: "translateX(-16px)" },
-          "100%": { opacity: "1", transform: "translateX(0)" },
-        },
+      maxWidth: {
+        page: "76rem",
+        prose: "38rem",
       },
     },
   },
