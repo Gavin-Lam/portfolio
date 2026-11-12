@@ -163,10 +163,11 @@ export const PROJECTS: Project[] = [
     ],
     decisions: [
       "Replaced the original scripted Q&A lookup with AI-driven conversation logic",
-      // TODO(Gavin): which model/API it uses, how conversation context is handled, and how sensitive health topics are kept safe
+      "Built the conversation pipeline with LangChain, calling Google Gemini as the model",
+      // TODO(Gavin): how conversation context/memory is handled, and how sensitive health topics are kept safe
     ],
     highlight: "Voice-interactive AI health assistant",
-    stack: ["Python", "JavaScript", "HTML/CSS", "Docker"],
+    stack: ["Python", "LangChain", "Gemini", "JavaScript", "HTML/CSS", "Docker"],
     github: "https://github.com/Gavin-Lam/healthchat",
     live: null,
   },
